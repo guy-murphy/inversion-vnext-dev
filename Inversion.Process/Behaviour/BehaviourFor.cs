@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Inversion.Process.Behaviour;
 
-namespace Inversion.Process {
-	public abstract class SimpleProcessBehaviour {
+namespace Inversion.Process.Behaviour {
+	/// <summary>
+	/// Provides a base class for implementing behaviours.
+	/// </summary>
+	/// <typeparam name="TEvent">Type of event which the behaviour will consume.</typeparam>
+	/// <typeparam name="TContext">Type of context which the behaviour will use.</typeparam>
+	public abstract class BehaviourFor<TEvent, TContext>: IBehaviourFor<TEvent, TContext> where TEvent: IEventFor<TContext> {
 
 		/// <summary>
 		/// The name the behaviour is known by to the system.
@@ -17,7 +17,7 @@ namespace Inversion.Process {
 		/// Creates a new instance of the behaviour.
 		/// </summary>
 		/// <param name="respondsTo">The message the behaviour responds to.</param>
-		protected SimpleProcessBehaviour(string respondsTo) {
+		protected BehaviourFor(string respondsTo) {
 			this.RespondsTo = respondsTo;
 		}
 
@@ -26,13 +26,12 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		/// <returns>
-		/// Returns <b>true</b> if the <see cref="IEvent.Message"/>
-		/// is the same as the <see cref="SimpleProcessBehaviour.RespondsTo"/>
+		/// Returns true if the condition is met; otherwise, returns false.
 		/// </returns>
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public virtual bool Condition(IEvent ev) {
+		public virtual bool Condition(TEvent ev) {
 			return this.Condition(ev, ev.Context);
 		}
 
@@ -47,48 +46,18 @@ namespace Inversion.Process {
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public virtual bool Condition(IEvent ev, ISimpleProcessContext context) {
+		public virtual bool Condition(TEvent ev, TContext context) {
 			// check the base condition
 			// and then either there are no roles specified
 			// or the user is in any of the roles defined
 			return this.RespondsTo == "*" || ev.Message == this.RespondsTo;
 		}
-
-		/// <summary>
-		/// Fires a message on the context of the event announcing
-		/// preprocessing for the event.
-		/// </summary>
-		/// <remarks>
-		/// The form the message will take is `"preprocessing::" + ev.Message`, and with
-		/// parameters from the original message copied over.
-		/// </remarks>
-		/// <param name="ev">The event for which preprocessing should take place.</param>
-		public virtual void Preprocess(IEvent ev) {
-			string message = String.Concat("preprocess::", ev.Message);
-			Event announcement = new Event(ev.Context, message, ev.Object, ev.Params);
-			announcement.Fire();
-		}
-
-		/// <summary>
-		/// Fires a message on the context of the event announcing
-		/// postprocessing for the event.
-		/// </summary>
-		/// <remarks>
-		/// The form the message will take is `"postprocessing::" + ev.Message`, and with
-		/// parameters from the original message copied over.
-		/// </remarks>
-		/// <param name="ev">The event for which postprocessing should take place.</param>
-		public virtual void Postprocess(IEvent ev) {
-			string message = String.Concat("postprocess::", ev.Message);
-			Event announcement = new Event(ev.Context, message, ev.Object, ev.Params);
-			announcement.Fire();
-		}
-
+		
 		/// <summary>
 		/// The action to perform when the `Condition(IEvent)` is met.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
-		public virtual void Action(IEvent ev) {
+		public virtual void Action(TEvent ev) {
 			this.Action(ev, ev.Context);
 		}
 
@@ -97,14 +66,14 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Action(IEvent ev, ISimpleProcessContext context);
+		public abstract void Action(TEvent ev, TContext context);
 
 		/// <summary>
 		/// Provide recovery from failures.
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		public virtual void Rescue(IEvent ev, Exception err) {
+		public virtual void Rescue(TEvent ev, Exception err) {
 			this.Rescue(ev, err, ev.Context);
 		}
 
@@ -114,7 +83,7 @@ namespace Inversion.Process {
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Rescue(IEvent ev, Exception err, ISimpleProcessContext context);
+		public abstract void Rescue(TEvent ev, Exception err, TContext context);
 
 	}
 }

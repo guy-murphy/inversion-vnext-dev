@@ -1,7 +1,5 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reactive.Subjects;
-using Inversion.Process.Behaviour;
 
 namespace Inversion.Process {
 	/// <summary>
@@ -14,8 +12,8 @@ namespace Inversion.Process {
 	/// on its bus *are* Inversion. Everything else is chosen convention about
 	/// how those behaviours interact with each other via the context.
 	/// </remarks>
-	public interface ISimpleProcessContext: IDisposable {
-		
+	public interface IContextFor<TEvent, in TBehaviour>: IDisposable {
+
 		/// <summary>
 		/// Exposes the processes service container.
 		/// </summary>
@@ -26,14 +24,14 @@ namespace Inversion.Process {
 		/// it is consulted for each event fired on this context.
 		/// </summary>
 		/// <param name="behaviour">The behaviour to register with this context.</param>
-		void Register(IProcessBehaviour behaviour);
+		void Register(TBehaviour behaviour);
 
 		/// <summary>
 		/// Registers a whole bunch of behaviours with this context ensuring
 		/// each one is consulted when an event is fired on this context.
 		/// </summary>
 		/// <param name="behaviours">The behaviours to register with this context.</param>
-		void Register(IEnumerable<IProcessBehaviour> behaviours);
+		void Register(IEnumerable<TBehaviour> behaviours);
 
 		/// <summary>
 		/// Creates and registers a runtime behaviour with this context constructed 
@@ -43,7 +41,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="condition">The predicate to use as the behaviours condition.</param>
 		/// <param name="action">The action to use as the behaviours action.</param>
-		void Register(Predicate<IEvent> condition, Action<IEvent, IProcessContext> action);
+		void Register(Predicate<TEvent> condition, Action<TEvent, IContextFor<TEvent, TBehaviour>> action);
 
 		/// <summary>
 		/// Fires an event on the context. Each behaviour registered with context
@@ -52,7 +50,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="ev">The event to fire on this context.</param>
 		/// <returns></returns>
-		IEvent Fire(IEvent ev);
+		TEvent Fire(TEvent ev);
 
 		/// <summary>
 		/// Constructs a simple event, with a simple string message
@@ -60,7 +58,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="message">The message to assign to the event.</param>
 		/// <returns>Returns the event that was constructed and fired on this context.</returns>
-		IEvent Fire(string message);
+		TEvent Fire(string message);
 
 		/// <summary>
 		/// Constructs an event using the message specified, and using the dictionary
@@ -70,12 +68,13 @@ namespace Inversion.Process {
 		/// <param name="message">The message to assign to the event.</param>
 		/// <param name="parms">The parameters to populate the event with.</param>
 		/// <returns>Returns the event that was constructed and fired on this context.</returns>
-		IEvent Fire(string message, IDictionary<string, string> parms);
+		TEvent Fire(string message, IDictionary<string, string> parms);
 
 		/// <summary>
 		/// Instructs the context that operations have finished, and that while it
 		/// may still be consulted no further events will be fired.
 		/// </summary>
 		void Completed();
+
 	}
 }

@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behaviour\IBehaviour.cs" />
     <Compile Include="Behaviour\IPrototype.cs" />
     <Compile Include="Behaviour\IPrototypeCase.cs" />
     <Compile Include="Behaviour\IPrototyped.cs" />
@@ -85,9 +86,11 @@
     <Compile Include="IConfiguration.cs" />
     <Compile Include="IConfigurationElement.cs" />
     <Compile Include="IConfigured.cs" />
+    <Compile Include="IContext.cs" />
     <Compile Include="IControlState.cs" />
     <Compile Include="IEvent.cs" />
     <Compile Include="Behaviour\IProcessBehaviour.cs" />
+    <Compile Include="IEventFor.cs" />
     <Compile Include="IProcessContext.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Behaviour\ProcessBehaviour.cs" />

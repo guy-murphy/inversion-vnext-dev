@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Inversion.Data;
 
 namespace Inversion.Process {
-	public class StatefulContext<TState>: SimpleProcessContext, IStatefulContext<TState> where TState : new() {
+	public abstract class StatefulContext<TState>: SimpleProcessContext, IStatefulContext<TState> where TState : new() {
 		public TState State { get; } = new TState();
 		public StatefulContext(IServiceContainer services) : base(services) {}
 	}

@@ -8,19 +8,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Inversion.Process {
-
 	/// <summary>
 	/// Represents an event occuring in the system.
 	/// </summary>
-	/// <remarks>
-	/// Exactly what "event" means is application specific
-	/// and can range from imperative to reactive.
-	/// </remarks>
-	public class Event : IEvent, IEnumerable<KeyValuePair<string, string>> {
-
-		private readonly string _message;
-		private readonly IProcessContext _context;
-		private readonly IDictionary<string, string> _params;
+	/// <typeparam name="TContext">Type of the context which this event is for.</typeparam>
+	/// <typeparam name="TBehaviour">Type of the behaviour that will respond to this event.</typeparam>
+	public class EventFor<TContext, TBehaviour>: IEventFor<TContext> where TContext: IContextFor<IEventFor<TContext>, TBehaviour>  {
+		
 		private IData _object;
 
 		/// <summary>
@@ -28,9 +22,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="key">The key of the parameter to look up.</param>
 		/// <returns>Returns the parameter indexed by the key.</returns>
-		public string this[string key] {
-			get { return this.Params.ContainsKey(key) ? this.Params[key] : null; }
-		}
+		public string this[string key] => this.Params.ContainsKey(key) ? this.Params[key] : null;
 
 		/// <summary>
 		/// The simple message the event represents.
@@ -38,21 +30,13 @@ namespace Inversion.Process {
 		/// <remarks>
 		/// Again, exactly what this means is application specific.
 		/// </remarks>
-		public string Message {
-			get {
-				return _message;
-			}
-		}
+		public string Message { get; }
 
 		/// <summary>
 		/// The parameters for this event represented
 		/// as key-value pairs.
 		/// </summary>
-		public IDictionary<string, string> Params {
-			get {
-				return _params;
-			}
-		}
+		public IDictionary<string, string> Params { get; }
 
 		/// <summary>
 		/// The context upon which this event is being fired.
@@ -60,11 +44,7 @@ namespace Inversion.Process {
 		/// <remarks>
 		/// And event always belongs to a context.
 		/// </remarks>
-		public IProcessContext Context {
-			get {
-				return _context;
-			}
-		}
+		public TContext Context { get; }
 
 		/// <summary>
 		/// Any object that the event may be carrying.
@@ -93,9 +73,7 @@ namespace Inversion.Process {
 		/// For this type the json object is created each time
 		/// it is accessed.
 		/// </remarks>
-		public JObject Data {
-			get { return this.ToJsonObject(); }
-		}
+		public JObject Data => this.ToJsonObject();
 
 		/// <summary>
 		/// Instantiates a new event bound  to a context.
@@ -103,7 +81,7 @@ namespace Inversion.Process {
 		/// <param name="context">The context to which the event is bound.</param>
 		/// <param name="message">The simple message the event represents.</param>
 		/// <param name="parameters">The parameters of the event.</param>
-		public Event(IProcessContext context, string message, IDictionary<string, string> parameters) : this(context, message, null, parameters) { }
+		public EventFor(TContext context, string message, IDictionary<string, string> parameters) : this(context, message, null, parameters) { }
 
 		/// <summary>
 		/// Instantiates a new event bound  to a context.
@@ -112,11 +90,11 @@ namespace Inversion.Process {
 		/// <param name="message">The simple message the event represents.</param>
 		/// <param name="obj">An object being carried by the event.</param>
 		/// <param name="parameters">The parameters of the event.</param>
-		public Event(IProcessContext context, string message, IData obj, IDictionary<string, string> parameters) {
-			_context = context;
-			_message = message;
+		public EventFor(TContext context, string message, IData obj, IDictionary<string, string> parameters) {
+			this.Context = context;
+			this.Message = message;
+			this.Params = (parameters == null) ? new Dictionary<string, string>() : new Dictionary<string, string>(parameters);
 			_object = obj;
-			_params = (parameters == null) ? new Dictionary<string, string>() : new Dictionary<string, string>(parameters);
 		}
 
 		/// <summary>
@@ -124,17 +102,17 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="context">The context to which the event is bound.</param>
 		/// <param name="message">The simple message the event represents.</param>
-		public Event(IProcessContext context, string message) : this(context, message, null) {}
+		public EventFor(TContext context, string message) : this(context, message, null) { }
 
 		/// <summary>
 		/// Instantiates a new event as a copy of the event provided.
 		/// </summary>
 		/// <param name="ev">The event to copy for this new instance.</param>
-		public Event(IEvent ev) {
-			_context = ev.Context;
-			_message = ev.Message;
+		public EventFor(IEventFor<TContext> ev) {
+			this.Context = ev.Context;
+			this.Message = ev.Message;
+			this.Params = new Dictionary<string, string>(ev.Params);
 			_object = ev.Object;
-			_params = new Dictionary<string, string>(ev.Params);
 		}
 
 		/// <summary>
@@ -143,7 +121,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <returns>The newly cloned event.</returns>
 		object ICloneable.Clone() {
-			return new Event(this);
+			return new EventFor<TContext, TBehaviour>(this);
 		}
 
 		/// <summary>
@@ -151,8 +129,8 @@ namespace Inversion.Process {
 		/// it into a new instance.
 		/// </summary>
 		/// <returns>The newly cloned event.</returns>
-		public virtual Event Clone() {
-			return new Event(this);
+		public virtual EventFor<TContext, TBehaviour> Clone() {
+			return new EventFor<TContext, TBehaviour>(this);
 		}
 
 		/// <summary>
@@ -170,7 +148,7 @@ namespace Inversion.Process {
 		/// <returns>
 		/// Returns the event that has just been fired.
 		/// </returns>
-		public IEvent Fire() {
+		public IEventFor<TContext> Fire() {
 			return this.Context.Fire(this);
 		}
 
@@ -313,10 +291,10 @@ namespace Inversion.Process {
 						ev.Elements().ToDictionary(el => el.Attribute("name").Value, el => el.Attribute("value").Value)
 					);
 				} else {
-					throw new ParseException("The expressed type of the json provided does not appear to be an event.");
+					throw new Event.ParseException("The expressed type of the json provided does not appear to be an event.");
 				}
 			} catch (Exception err) {
-				throw new ParseException("An unexpected error was encoutered parsing the provided json into an event object.", err);
+				throw new Event.ParseException("An unexpected error was encoutered parsing the provided json into an event object.", err);
 			}
 		}
 
@@ -336,10 +314,10 @@ namespace Inversion.Process {
 						job.Value<JObject>("params").Properties().ToDictionary(p => p.Name, p => p.Value.ToString())
 					);
 				} else {
-					throw new ParseException("The expressed type of the json provided does not appear to be an event.");
+					throw new Event.ParseException("The expressed type of the json provided does not appear to be an event.");
 				}
 			} catch (Exception err) {
-				throw new ParseException("An unexpected error was encoutered parsing the provided json into an event object.", err);
+				throw new Event.ParseException("An unexpected error was encoutered parsing the provided json into an event object.", err);
 			}
 		}
 
