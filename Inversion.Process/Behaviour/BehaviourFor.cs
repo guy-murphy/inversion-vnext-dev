@@ -4,9 +4,8 @@ namespace Inversion.Process.Behaviour {
 	/// <summary>
 	/// Provides a base class for implementing behaviours.
 	/// </summary>
-	/// <typeparam name="TEvent">Type of event which the behaviour will consume.</typeparam>
-	/// <typeparam name="TContext">Type of context which the behaviour will use.</typeparam>
-	public abstract class BehaviourFor<TEvent, TContext>: IBehaviourFor<TEvent, TContext> where TEvent: IEventFor<TContext> {
+	/// <typeparam name="TState">The type of context state.</typeparam>
+	public abstract class BehaviourFor<TState>: IBehaviourFor<TState> {
 
 		/// <summary>
 		/// The name the behaviour is known by to the system.
@@ -31,7 +30,7 @@ namespace Inversion.Process.Behaviour {
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public virtual bool Condition(TEvent ev) {
+		public virtual bool Condition(IEventFor<TState> ev) {
 			return this.Condition(ev, ev.Context);
 		}
 
@@ -46,7 +45,7 @@ namespace Inversion.Process.Behaviour {
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public virtual bool Condition(TEvent ev, TContext context) {
+		public virtual bool Condition(IEventFor<TState> ev, IContextFor<TState> context) {
 			// check the base condition
 			// and then either there are no roles specified
 			// or the user is in any of the roles defined
@@ -57,7 +56,7 @@ namespace Inversion.Process.Behaviour {
 		/// The action to perform when the `Condition(IEvent)` is met.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
-		public virtual void Action(TEvent ev) {
+		public virtual void Action(IEventFor<TState> ev) {
 			this.Action(ev, ev.Context);
 		}
 
@@ -66,14 +65,14 @@ namespace Inversion.Process.Behaviour {
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Action(TEvent ev, TContext context);
+		public abstract void Action(IEventFor<TState> ev, IContextFor<TState> context);
 
 		/// <summary>
 		/// Provide recovery from failures.
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		public virtual void Rescue(TEvent ev, Exception err) {
+		public virtual void Rescue(IEventFor<TState> ev, Exception err) {
 			this.Rescue(ev, err, ev.Context);
 		}
 
@@ -83,7 +82,7 @@ namespace Inversion.Process.Behaviour {
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Rescue(TEvent ev, Exception err, TContext context);
+		public abstract void Rescue(IEventFor<TState> ev, Exception err, IContextFor<TState> context);
 
 	}
 }

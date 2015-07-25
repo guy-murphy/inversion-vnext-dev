@@ -9,5 +9,7 @@ namespace Inversion.Process {
 	/// Exactly what "event" means is application specific
 	/// and can range from imperative to reactive.
 	/// </remarks>
-	public interface IEvent : IEventFor<IProcessContext> {}
+	public interface IEvent : IEventFor<IControlState> {
+		new IProcessContext Context { get; }
+	}
 }

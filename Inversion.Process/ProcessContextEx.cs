@@ -17,7 +17,7 @@ namespace Inversion.Process {
 		/// <param name="self">The context being acted upon.</param>
 		/// <returns>Returns true if the flag exists; otherwise returns false.</returns>
 		public static bool IsFlagged(this IProcessContext self, string flag) {
-			return self.Flags.Contains(flag);
+			return self.State.Flags.Contains(flag);
 		}
 
 		/// <summary>
@@ -28,7 +28,7 @@ namespace Inversion.Process {
 		/// <param name="self">The context being acted upon.</param>
 		/// <returns>Returns true if all the parameters exist; otherwise return false.</returns>
 		public static bool HasParams(this IProcessContext self, params string[] parms) {
-			return parms.Length > 0 && parms.All(parm => self.Params.ContainsKey(parm));
+			return parms.Length > 0 && parms.All(parm => self.State.Params.ContainsKey(parm));
 		}
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Inversion.Process {
 		/// <param name="self">The context being acted upon.</param>
 		/// <returns>Returns true if all the parameters exist; otherwise return false.</returns>
 		public static bool HasParams(this IProcessContext self, IEnumerable<string> parms) {
-			return parms != null && parms.All(parm => self.Params.ContainsKey(parm));
+			return parms != null && parms.All(parm => self.State.Params.ContainsKey(parm));
 		}
 
 		/// <summary>
@@ -52,7 +52,7 @@ namespace Inversion.Process {
 			int i = 0;
 			foreach (string parm in parms) {
 				i++;
-				if (self.Params.ContainsKey(parm)) return true;
+				if (self.State.Params.ContainsKey(parm)) return true;
 			}
 			return i == 0; // there were no parameters specified
 		}
@@ -69,7 +69,7 @@ namespace Inversion.Process {
 		/// in this conext; otherwise returns false.
 		/// </returns>
 		public static bool HasParamValue(this IProcessContext self, string name, string value) {
-			return self.Params.ContainsKey(name) && self.Params[name] == value;
+			return self.State.Params.ContainsKey(name) && self.State.Params[name] == value;
 		}
 
 		/// <summary>
@@ -83,7 +83,7 @@ namespace Inversion.Process {
 		/// parameters; otherwise returns false.
 		/// </returns>
 		public static bool HasParamValues(this IProcessContext self, IEnumerable<KeyValuePair<string, string>> match) {
-			return match != null && match.All(entry => self.Params.Contains(entry));
+			return match != null && match.All(entry => self.State.Params.Contains(entry));
 		}
 
 		/// <summary>
@@ -100,7 +100,7 @@ namespace Inversion.Process {
 			int i = 0;
 			foreach (KeyValuePair<string, string> kv in match) {
 				i++;
-				if (self.Params.Contains(kv)) return true;
+				if (self.State.Params.Contains(kv)) return true;
 			}
 			return i == 0; // there was no match specified
 		}
@@ -116,7 +116,7 @@ namespace Inversion.Process {
 		/// otherwise, returns false.
 		/// </returns>
 		public static bool HasParamValues(this IProcessContext self, IEnumerable<KeyValuePair<string, IEnumerable<string>>> match) {
-			return match != null && match.All(entry => self.Params.ContainsKey(entry.Key) && entry.Value.Any(value => value == self.Params[entry.Key]));
+			return match != null && match.All(entry => self.State.Params.ContainsKey(entry.Key) && entry.Value.Any(value => value == self.State.Params[entry.Key]));
 		}
 
 		/// <summary>
@@ -130,9 +130,9 @@ namespace Inversion.Process {
 		public static bool HasRequiredParams(this IProcessContext self, params string[] parms) {
 			bool has = parms.Length > 0;
 			foreach (string parm in parms) {
-				if (!self.Params.ContainsKey(parm)) {
+				if (!self.State.Params.ContainsKey(parm)) {
 					has = false;
-					self.Errors.CreateMessage(String.Format("The parameter '{0}' is required and was not present.", parm));
+					self.State.Errors.CreateMessage(String.Format("The parameter '{0}' is required and was not present.", parm));
 				}
 			}
 			return has;
@@ -149,7 +149,7 @@ namespace Inversion.Process {
 		/// otherwise returns false.
 		/// </returns>
 		public static bool HasControlState(this IProcessContext self, params string[] parms) {
-			return parms.Length > 0 && parms.All(parm => self.ControlState.Keys.Contains(parm));
+			return parms.Length > 0 && parms.All(parm => self.State.Keys.Contains(parm));
 		}
 
 		/// <summary>
@@ -163,7 +163,7 @@ namespace Inversion.Process {
 		/// otherwise returns false.
 		/// </returns>
 		public static bool HasControlState(this IProcessContext self, IEnumerable<string> parms) {
-			return parms != null && parms.All(parm => self.ControlState.Keys.Contains(parm));
+			return parms != null && parms.All(parm => self.State.Keys.Contains(parm));
 		}
 
 		/// <summary>
@@ -179,9 +179,9 @@ namespace Inversion.Process {
 		public static bool HasRequiredControlState(this IProcessContext self, params string[] parms) {
 			bool has = parms.Length > 0;
 			foreach (string parm in parms) {
-				if (!self.ControlState.ContainsKey(parm)) {
+				if (!self.State.ContainsKey(parm)) {
 					has = false;
-					self.Errors.CreateMessage(String.Format("The control state '{0}' is required and was not present.", parm));
+					self.State.Errors.CreateMessage(String.Format("The control state '{0}' is required and was not present.", parm));
 				}
 			}
 			return has;
@@ -196,7 +196,7 @@ namespace Inversion.Process {
 		/// <param name="self">The context being acted upon.</param>
 		/// <returns>Returns the specified parameter if it exists; otherwise returns false.</returns>
 		public static string ParamOrDefault(this IProcessContext self, string key, string defaultValue) {
-			return self.Params.ContainsKey(key) ? self.Params[key] : defaultValue;
+			return self.State.Params.ContainsKey(key) ? self.State.Params[key] : defaultValue;
 		}
 
 

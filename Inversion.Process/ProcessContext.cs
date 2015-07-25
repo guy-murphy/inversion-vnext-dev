@@ -20,13 +20,8 @@ namespace Inversion.Process {
 	/// on its bus *are* Inversion. Everything else is chosen convention about
 	/// how those behaviours interact with each other via the context.
 	/// </remarks>
-	public class ProcessContext : StatefulContext<ControlState>, IProcessContext {
-
-		/// <summary>
-		/// Exposes resources external to the process.
-		/// </summary>
-		public IResourceAdapter Resources { get; }
-
+	public class ProcessContext : ContextFor<IControlState>, IProcessContext {
+		
 		/// <summary>
 		/// Provsion of a simple object cache for the context.
 		/// </summary>
@@ -35,9 +30,6 @@ namespace Inversion.Process {
 		/// that we control. This isn't portable.
 		/// </remarks>
 		public ObjectCache ObjectCache { get; } = MemoryCache.Default;
-
-
-		public IControlState State { get; }  = new ControlState();
 
 		/// <summary>
 		/// Gives access to a collection of view steps
@@ -100,28 +92,8 @@ namespace Inversion.Process {
 		/// <remarks>You can think of this type here as "being Inversion". This is the thing.</remarks>
 		/// <param name="services">The service container the context will use.</param>
 		/// <param name="resources">The resources available to the context.</param>
-		public ProcessContext(IServiceContainer services, IResourceAdapter resources): base(services) {
-			this.Resources = resources;
-		}
+		public ProcessContext(IServiceContainer services, IResourceAdapter resources): base(services, resources, new ControlState()) {}
 
-		/// <summary>
-		/// Desrtructor for the type.
-		/// </summary>
-		~ProcessContext() {
-			// ensure unmanaged resources are cleaned up
-			// this might all be a bit conceipted, I'm not sure
-			// we've run into a real use-case requiring this since day one.
-			this.Dispose(false);
-		}
-
-		/// <summary>
-		/// Releases all resources maintained by the current context instance.
-		/// </summary>
-		public void Dispose() {
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-		
 		/// <summary>
 		/// Fires an event on the context. Each behaviour registered with context
 		/// is consulted in no particular order, and for each behaviour that has a condition
@@ -129,15 +101,40 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="ev">The event to fire on this context.</param>
 		/// <returns></returns>
-		public override IEvent Fire(IEvent ev) {
+		public override IEventFor<IControlState> Fire(IEventFor<IControlState> ev) {
 			if (ev.Context != this) throw new ProcessException("The event has a different context that the one on which it has been fired.");
 			try {
 				this.Bus.OnNext(ev);
 			} catch (ThreadAbortException) {
 				// we have probably been redirected
 			} catch (Exception err) {
-				this.Errors.Add(new ErrorMessage(String.Format("A problem was encountered firing '{0}'", ev.Message), err));
+				this.Errors.Add(new ErrorMessage($"A problem was encountered firing '{ev.Message}'", err));
 			}
+			return ev;
+		}
+
+		/// <summary>
+		/// Fires an event on the context. Each behaviour registered with context
+		/// is consulted in no particular order, and for each behaviour that has a condition
+		/// that returns true when applied to the event, that behaviours action is executed.
+		/// </summary>
+		/// <param name="ev">The event to fire on this context.</param>
+		/// <returns></returns>
+		public IEvent Fire(IEvent ev) {
+			return this.Fire(ev as IEventFor<IControlState>) as IEvent;
+		}
+
+		/// <summary>
+		/// Constructs an event using the message specified, and using the dictionary
+		/// provided to populate the parameters of the event. This event is then
+		/// fired on this context.
+		/// </summary>
+		/// <param name="message">The message to assign to the event.</param>
+		/// <param name="parms">The parameters to populate the event with.</param>
+		/// <returns>Returns the event that was constructed and fired on this context.</returns>
+		public override IEventFor<IControlState> Fire(string message, IDictionary<string, string> parms) {
+			IEvent ev = new Event(this, message, parms);
+			this.Fire(ev);
 			return ev;
 		}
 
@@ -166,15 +163,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <returns>Returns a string representation of the context.</returns>
 		public override string ToString() {
-			// I'm not sure the value this method adds to the type.
-			StringBuilder sb = new StringBuilder();
-
-			if (this.ViewSteps.HasSteps && this.ViewSteps.Last.HasModel) {
-				sb.Append(this.ViewSteps.Last.ToString());
-			}
-
-			return sb.ToString();
+			return this.State.ToJson();
 		}
-
 	}
 }

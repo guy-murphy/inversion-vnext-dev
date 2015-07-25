@@ -12,8 +12,6 @@ namespace Inversion.Process.Tests.Behaviour {
 
 		private IEnumerable<IProcessContext> _getContexts() {
 			yield return new ProcessContext(ServiceContainer.Instance, FileSystemResourceAdapter.Instance);
-			yield return new HashBackedProcessContext(ServiceContainer.Instance, FileSystemResourceAdapter.Instance);
-			yield return new SynchronizedProcessContext(ServiceContainer.Instance, FileSystemResourceAdapter.Instance);
 		}
 
 		[TestMethod]
@@ -34,7 +32,7 @@ namespace Inversion.Process.Tests.Behaviour {
 				);
 				context.Register(
 					condition: (ev) => ev.Message.Contains("left") && ev.Message.Contains("field"), 
-					action: (ev, ctx) => ctx.Flags.Add("left-field")
+					action: (ev, ctx) => ctx.State.Flags.Add("left-field")
 				);
 				
 				context.Fire("test-message");

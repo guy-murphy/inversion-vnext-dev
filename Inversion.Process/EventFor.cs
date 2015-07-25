@@ -11,9 +11,8 @@ namespace Inversion.Process {
 	/// <summary>
 	/// Represents an event occuring in the system.
 	/// </summary>
-	/// <typeparam name="TContext">Type of the context which this event is for.</typeparam>
-	/// <typeparam name="TBehaviour">Type of the behaviour that will respond to this event.</typeparam>
-	public class EventFor<TContext, TBehaviour>: IEventFor<TContext> where TContext: IContextFor<IEventFor<TContext>, TBehaviour>  {
+	/// <typeparam name="TState">Type of context state.</typeparam>
+	public class EventFor<TState>: IEventFor<TState> {
 		
 		private IData _object;
 
@@ -44,7 +43,7 @@ namespace Inversion.Process {
 		/// <remarks>
 		/// And event always belongs to a context.
 		/// </remarks>
-		public TContext Context { get; }
+		public IContextFor<TState> Context { get; }
 
 		/// <summary>
 		/// Any object that the event may be carrying.
@@ -81,7 +80,7 @@ namespace Inversion.Process {
 		/// <param name="context">The context to which the event is bound.</param>
 		/// <param name="message">The simple message the event represents.</param>
 		/// <param name="parameters">The parameters of the event.</param>
-		public EventFor(TContext context, string message, IDictionary<string, string> parameters) : this(context, message, null, parameters) { }
+		public EventFor(IContextFor<TState> context, string message, IDictionary<string, string> parameters) : this(context, message, null, parameters) { }
 
 		/// <summary>
 		/// Instantiates a new event bound  to a context.
@@ -90,7 +89,7 @@ namespace Inversion.Process {
 		/// <param name="message">The simple message the event represents.</param>
 		/// <param name="obj">An object being carried by the event.</param>
 		/// <param name="parameters">The parameters of the event.</param>
-		public EventFor(TContext context, string message, IData obj, IDictionary<string, string> parameters) {
+		public EventFor(IContextFor<TState> context, string message, IData obj, IDictionary<string, string> parameters) {
 			this.Context = context;
 			this.Message = message;
 			this.Params = (parameters == null) ? new Dictionary<string, string>() : new Dictionary<string, string>(parameters);
@@ -102,13 +101,13 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="context">The context to which the event is bound.</param>
 		/// <param name="message">The simple message the event represents.</param>
-		public EventFor(TContext context, string message) : this(context, message, null) { }
+		public EventFor(IContextFor<TState> context, string message) : this(context, message, null) { }
 
 		/// <summary>
 		/// Instantiates a new event as a copy of the event provided.
 		/// </summary>
 		/// <param name="ev">The event to copy for this new instance.</param>
-		public EventFor(IEventFor<TContext> ev) {
+		public EventFor(IEventFor<TState> ev) {
 			this.Context = ev.Context;
 			this.Message = ev.Message;
 			this.Params = new Dictionary<string, string>(ev.Params);
@@ -121,7 +120,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <returns>The newly cloned event.</returns>
 		object ICloneable.Clone() {
-			return new EventFor<TContext, TBehaviour>(this);
+			return new EventFor<TState>(this);
 		}
 
 		/// <summary>
@@ -129,8 +128,8 @@ namespace Inversion.Process {
 		/// it into a new instance.
 		/// </summary>
 		/// <returns>The newly cloned event.</returns>
-		public virtual EventFor<TContext, TBehaviour> Clone() {
-			return new EventFor<TContext, TBehaviour>(this);
+		public virtual EventFor<TState> Clone() {
+			return new EventFor<TState>(this);
 		}
 
 		/// <summary>
@@ -148,7 +147,7 @@ namespace Inversion.Process {
 		/// <returns>
 		/// Returns the event that has just been fired.
 		/// </returns>
-		public IEventFor<TContext> Fire() {
+		public IEventFor<TState> Fire() {
 			return this.Context.Fire(this);
 		}
 

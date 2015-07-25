@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Inversion.Process.Behaviour {
 	/// <summary>
 	/// Describes a basic behaviour.
 	/// </summary>
-	public interface IBehaviourFor<in TEvent, in TContext> {
+	/// <typeparam name="TState">The type of context state.</typeparam>
+	public interface IBehaviourFor<TState> {
 		/// <summary>
 		/// Gets the message that the behaviour will respond to.
 		/// </summary>
@@ -19,7 +16,7 @@ namespace Inversion.Process.Behaviour {
 		/// Process an action for the provided <see cref="IEvent"/>.
 		/// </summary>
 		/// <param name="ev">The event to be processed. </param>
-		void Action(TEvent ev);
+		void Action(IEventFor<TState> ev);
 		
 		/// <summary>
 		/// Process the action in response to the provided <see cref="IEvent"/>
@@ -27,14 +24,14 @@ namespace Inversion.Process.Behaviour {
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="context">The context to use.</param>
-		void Action(TEvent ev, TContext context);
+		void Action(IEventFor<TState> ev, IContextFor<TState> context);
 
 		/// <summary>
 		/// Provide recovery from failures.
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		void Rescue(TEvent ev, Exception err);
+		void Rescue(IEventFor<TState> ev, Exception err);
 
 		/// <summary>
 		/// Provide recovery from failures.
@@ -42,7 +39,7 @@ namespace Inversion.Process.Behaviour {
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
 		/// <param name="context">The context to use.</param>
-		void Rescue(TEvent ev, Exception err, TContext context);
+		void Rescue(IEventFor<TState> ev, Exception err, IContextFor<TState> context);
 
 		/// <summary>
 		/// The considtion that determines whether of not the behaviours action
@@ -52,7 +49,7 @@ namespace Inversion.Process.Behaviour {
 		/// <returns>
 		/// `true` if the condition is met; otherwise,  returns  `false`.
 		/// </returns>
-		bool Condition(TEvent ev);
+		bool Condition(IEventFor<TState> ev);
 
 		/// <summary>
 		/// The considtion that determines whether of not the behaviours action
@@ -63,6 +60,6 @@ namespace Inversion.Process.Behaviour {
 		/// <returns>
 		/// `true` if the condition is met; otherwise,  returns  `false`.
 		/// </returns>
-		bool Condition(TEvent ev, TContext context);
+		bool Condition(IEventFor<TState> ev, IContextFor<TState> context);
 	}
 }

@@ -6,16 +6,16 @@ namespace Inversion.Process.Behaviour {
 	/// A behaviour that facilitates creating behaviours whose conditions and actions
 	/// are assigned at runtime not compile time.
 	/// </summary>
-	public class RuntimeBehaviour : ProcessBehaviour {
+	public class RuntimeBehaviourFor<TState> : BehaviourFor<TState> {
 
-		private readonly Predicate<IEvent> _condition;
-		private readonly Action<IEvent, IProcessContext> _action;
+		private readonly Predicate<IEventFor<TState>> _condition;
+		private readonly Action<IEventFor<TState>, IContextFor<TState>> _action;
 
 		/// <summary>
 		/// Instantiates a new runtime behaviour.
 		/// </summary>
 		/// <param name="respondsTo">The name by which the behaviour is known to the system.</param>
-		protected RuntimeBehaviour(string respondsTo) : base(respondsTo) { }
+		protected RuntimeBehaviourFor(string respondsTo) : base(respondsTo) { }
 
 		/// <summary>
 		/// Instantiates a new runtime behaviour.
@@ -23,28 +23,20 @@ namespace Inversion.Process.Behaviour {
 		/// <param name="respondsTo">The name by which the behaviour is known to the system.</param>
 		/// <param name="condition">The predicate that will determine if this behaviours action should be executed.</param>
 		/// <param name="action">The action that should be performed if this behaviours conditions are met.</param>
-		public RuntimeBehaviour(string respondsTo, Predicate<IEvent> condition, Action<IEvent, IProcessContext> action)
+		public RuntimeBehaviourFor(string respondsTo, Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>, IContextFor<TState>> action)
 			: base(respondsTo) {
 			_condition = condition;
 			_action = action;
 		}
 
-		/// <summary>
-		/// Determines if this behaviours action should be executed in
-		/// response to the provided event.
-		/// </summary>
-		/// <param name="ev">The event to consider.</param>
-		/// <returns>Returns true if this behaviours action to execute in response to this event; otherwise returns  false.</returns>
-		public override bool Condition(IEvent ev) {
+		public override void Rescue(IEventFor<TState> ev, Exception err, IContextFor<TState> context) {
+		}
+
+		public override bool Condition(IEventFor<TState> ev) {
 			return _condition(ev);
 		}
 
-		/// <summary>
-		/// The action to perform if this behaviours condition is met.
-		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
+		public override void Action(IEventFor<TState> ev, IContextFor<TState> context) {
 			_action(ev, context);
 		}
 	}

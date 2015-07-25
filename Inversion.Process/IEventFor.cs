@@ -4,8 +4,8 @@ namespace Inversion.Process {
 	/// <summary>
 	/// Represents an event occuring in the system.
 	/// </summary>
-	/// <typeparam name="TContext">Type of the context which this event is for.</typeparam>
-	public interface IEventFor<out TContext>: IData, IEnumerable<KeyValuePair<string, string>> {
+	/// <typeparam name="TState">The type of context state.</typeparam>
+	public interface IEventFor<TState>: IData, IEnumerable<KeyValuePair<string, string>> {
 		/// <summary>
 		/// Provides indexed access to the events parameters.
 		/// </summary>
@@ -36,7 +36,7 @@ namespace Inversion.Process {
 		/// <remarks>
 		/// And event always belongs to a context.
 		/// </remarks>
-		TContext Context { get; }
+		IContextFor<TState> Context { get; }
 		/// <summary>
 		/// Any object that the event may be carrying.
 		/// </summary>
@@ -88,6 +88,6 @@ namespace Inversion.Process {
 		/// <returns>
 		/// Returns the event that has just been fired.
 		/// </returns>
-		IEventFor<TContext> Fire();
+		IEventFor<TState> Fire();
 	}
 }

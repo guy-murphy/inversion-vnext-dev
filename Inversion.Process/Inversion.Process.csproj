@@ -63,7 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Behaviour\IBehaviour.cs" />
+    <Compile Include="Behaviour\IBehaviourFor.cs" />
+    <Compile Include="Behaviour\IProcessBehaviour.cs" />
     <Compile Include="Behaviour\IPrototype.cs" />
     <Compile Include="Behaviour\IPrototypeCase.cs" />
     <Compile Include="Behaviour\IPrototyped.cs" />
@@ -83,20 +84,18 @@
     <Compile Include="DataCollectionEx.cs" />
     <Compile Include="ErrorMessage.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="EventFor.cs" />
     <Compile Include="IConfiguration.cs" />
     <Compile Include="IConfigurationElement.cs" />
     <Compile Include="IConfigured.cs" />
-    <Compile Include="IContext.cs" />
+    <Compile Include="IContextFor.cs" />
     <Compile Include="IControlState.cs" />
     <Compile Include="IEvent.cs" />
-    <Compile Include="Behaviour\IProcessBehaviour.cs" />
     <Compile Include="IEventFor.cs" />
     <Compile Include="IProcessContext.cs" />
     <Compile Include="IServiceContainer.cs" />
     <Compile Include="Behaviour\ProcessBehaviour.cs" />
     <Compile Include="IServiceContainerRegistrar.cs" />
-    <Compile Include="ISimpleProcessContext.cs" />
-    <Compile Include="IStatefulContext.cs" />
     <Compile Include="ProcessContext.cs" />
     <Compile Include="ProcessContextEx.cs" />
     <Compile Include="ProcessException.cs" />
@@ -104,11 +103,8 @@
     <Compile Include="ProcessTimerDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Behaviour\RuntimeBehaviour.cs" />
-    <Compile Include="HashBackedProcessContext.cs" />
-    <Compile Include="SimpleProcessBehaviour.cs" />
-    <Compile Include="SimpleProcessContext.cs" />
-    <Compile Include="StatefulContext.cs" />
-    <Compile Include="SynchronizedProcessContext.cs" />
+    <Compile Include="Behaviour\BehaviourFor.cs" />
+    <Compile Include="ContextFor.cs" />
     <Compile Include="ViewStep.cs" />
     <Compile Include="ViewSteps.cs" />
   </ItemGroup>

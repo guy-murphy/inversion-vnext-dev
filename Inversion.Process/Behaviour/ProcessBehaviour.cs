@@ -6,7 +6,7 @@ namespace Inversion.Process.Behaviour {
 	/// A simple named behaviour with a default condition
 	/// matching that name againts <see cref="IEvent.Message"/>.
 	/// </summary>
-	public abstract class ProcessBehaviour : SimpleProcessBehaviour, IProcessBehaviour {
+	public abstract class ProcessBehaviour : BehaviourFor<IControlState>, IProcessBehaviour {
 
 		
 		/// <summary>
@@ -26,7 +26,7 @@ namespace Inversion.Process.Behaviour {
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public override bool Condition(IEvent ev) {
+		public virtual bool Condition(IEvent ev) {
 			return this.Condition(ev, (IProcessContext)ev.Context);
 		}
 
@@ -47,9 +47,13 @@ namespace Inversion.Process.Behaviour {
 			// or the user is in any of the roles defined
 			return this.RespondsTo == "*" || ev.Message == this.RespondsTo;
 		}
+
+		public virtual void Action(IEvent ev) {
+			base.Action(ev);
+		}
 		
-		public override void Action(IEvent ev, ISimpleProcessContext context) {
-			this.Action(ev, (IProcessContext)context);
+		public override void Action(IEventFor<IControlState> ev, IContextFor<IControlState> context) {
+			this.Action((IEvent)ev, (IProcessContext)context);
 		}
 
 		/// <summary>
@@ -58,9 +62,15 @@ namespace Inversion.Process.Behaviour {
 		/// <param name="ev">The event to consult.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
 		public abstract void Action(IEvent ev, IProcessContext context);
-		
-		public override void Rescue(IEvent ev, Exception err, ISimpleProcessContext context) {
-			this.Rescue(ev, err, (IProcessContext)context);
+
+		/// <summary>
+		/// Provide recovery from failures.
+		/// </summary>
+		/// <param name="ev">The event to process.</param>
+		/// <param name="err">The exception raised by the behaviours actions.</param>
+		/// <param name="context">The context upon which to perform any action.</param>
+		public override void Rescue(IEventFor<IControlState> ev, Exception err, IContextFor<IControlState> context) {
+			this.Rescue((IEvent)ev, err, (IProcessContext)context);
 		}
 
 		/// <summary>

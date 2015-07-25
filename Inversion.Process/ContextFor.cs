@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-
+using Inversion.Data;
 using Inversion.Process.Behaviour;
 
 namespace Inversion.Process {
@@ -16,28 +16,40 @@ namespace Inversion.Process {
 	/// on its bus *are* Inversion. Everything else is chosen convention about
 	/// how those behaviours interact with each other via the context.
 	/// </remarks>
-	public abstract class ContextFor<TEvent, TBehaviour> :  IContextFor<TEvent, TBehaviour>
-		where TEvent: IEventFor<IContextFor<TEvent, TBehaviour>> 
-		where TBehaviour: IBehaviourFor<TEvent, IContextFor<TEvent, TBehaviour>> {
+	public abstract class ContextFor<TState> :  IContextFor<TState> {
 
 		private bool _isDisposed;
 
 		/// <summary>
 		/// The event bus of the process.
 		/// </summary>
-		protected ISubject<TEvent> Bus { get; } = new Subject<TEvent>();
+		protected ISubject<IEventFor<TState>> Bus { get; } = new Subject<IEventFor<TState>>();
 		/// <summary>
 		/// Exposes the processes service container.
 		/// </summary>
 		public IServiceContainer Services { get; }
 
 		/// <summary>
+		/// Exposes resources external to the process.
+		/// </summary>
+		public IResourceAdapter Resources { get; }
+
+		/// <summary>
+		/// Models the mutable state of the context.
+		/// </summary>
+		public TState State { get; }
+
+		/// <summary>
 		/// Instantiates a new simple process contrext for inversion.
 		/// </summary>
 		/// <remarks>You can think of this type here as "being Inversion". This is the thing.</remarks>
 		/// <param name="services">The service container the context will use.</param>
-		protected ContextFor(IServiceContainer services) {
+		/// <param name="resources">The resources available to the context.</param>
+		/// <param name="state">The mutable state of the context.</param>
+		protected ContextFor(IServiceContainer services, IResourceAdapter resources, TState state) {
 			this.Services = services;
+			this.Resources = resources;
+			this.State = state;
 		}
 
 		/// <summary>
@@ -88,9 +100,9 @@ namespace Inversion.Process {
 		/// it is consulted for each event fired on this context.
 		/// </summary>
 		/// <param name="behaviour">The behaviour to register with this context.</param>
-		public void Register(TBehaviour behaviour) {
+		public void Register(IBehaviourFor<TState> behaviour) {
 			this.Bus.Where(ev => behaviour.Condition(ev)).Subscribe(
-				(TEvent ev) => {
+				(IEventFor<TState> ev) => {
 					try {
 						behaviour.Action(ev);
 					} catch (Exception err) {
@@ -105,8 +117,8 @@ namespace Inversion.Process {
 		/// each one is consulted when an event is fired on this context.
 		/// </summary>
 		/// <param name="behaviours">The behaviours to register with this context.</param>
-		public void Register(IEnumerable<TBehaviour> behaviours) {
-			foreach (TBehaviour behaviour in behaviours) {
+		public void Register(IEnumerable<IBehaviourFor<TState>> behaviours) {
+			foreach (IBehaviourFor<TState> behaviour in behaviours) {
 				this.Register(behaviour);
 			}
 		}
@@ -119,8 +131,8 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="condition">The predicate to use as the behaviours condition.</param>
 		/// <param name="action">The action to use as the behaviours action.</param>
-		public void Register(Predicate<TEvent> condition, Action<TEvent, IContextFor<TEvent, TBehaviour>> action) {
-			// TODO: this.Register(new RuntimeBehaviour(String.Empty, condition, action));
+		public void Register(Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>, IContextFor<TState>> action) {
+			this.Register(new RuntimeBehaviourFor<TState>(String.Empty, condition, action));
 		}
 
 		/// <summary>
@@ -130,7 +142,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="ev">The event to fire on this context.</param>
 		/// <returns></returns>
-		public virtual TEvent Fire(TEvent ev) {
+		public virtual IEventFor<TState> Fire(IEventFor<TState> ev) {
 			if (ev.Context != this) throw new ProcessException("The event has a different context that the one on which it has been fired.");
 			this.Bus.OnNext(ev);
 			return ev;
@@ -142,7 +154,7 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="message">The message to assign to the event.</param>
 		/// <returns>Returns the event that was constructed and fired on this context.</returns>
-		public TEvent Fire(string message) {
+		public IEventFor<TState> Fire(string message) {
 			return this.Fire(message, null);
 		}
 
@@ -154,7 +166,7 @@ namespace Inversion.Process {
 		/// <param name="message">The message to assign to the event.</param>
 		/// <param name="parms">The parameters to populate the event with.</param>
 		/// <returns>Returns the event that was constructed and fired on this context.</returns>
-		public abstract TEvent Fire(string message, IDictionary<string, string> parms);
+		public abstract IEventFor<TState> Fire(string message, IDictionary<string, string> parms);
 
 		/// <summary>
 		/// Instructs the context that operations have finished, and that while it
