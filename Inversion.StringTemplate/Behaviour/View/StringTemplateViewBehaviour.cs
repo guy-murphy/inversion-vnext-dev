@@ -32,18 +32,17 @@ namespace Inversion.StringTemplate.Behaviour.View {
 		/// for their behaviour.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			if (context.ViewSteps.HasSteps && context.ViewSteps.Last.HasModel) {
-				foreach (string templateName in this.GetPossibleTemplates(context, "st")) {
+		public override void Action(IEvent ev) {
+			if (ev.Context.ViewSteps.HasSteps && ev.Context.ViewSteps.Last.HasModel) {
+				foreach (string templateName in this.GetPossibleTemplates(ev.Context, "st")) {
 					string templatePath = Path.Combine("Resources", "Views", "ST", templateName);
-					if (context.Resources.Exists(templatePath)) {
-						string src = context.Resources.ReadAllText(templatePath);
+					if (ev.Context.Resources.Exists(templatePath)) {
+						string src = ev.Context.Resources.ReadAllText(templatePath);
 						Template template = new Template(src, '`', '`');
-						template.Add("ctx", context);
-						template.Add("model", context.ViewSteps.Last.Model);
+						template.Add("ctx", ev.Context);
+						template.Add("model", ev.Context.ViewSteps.Last.Model);
 						string result = template.Render();
-						context.ViewSteps.CreateStep(templateName, this.ContentType, result);
+						ev.Context.ViewSteps.CreateStep(templateName, this.ContentType, result);
 						break; // we've found and processed our template, no need to keep looking
 					}
 				}

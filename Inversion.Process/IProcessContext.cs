@@ -38,13 +38,7 @@ namespace Inversion.Process {
 		/// <param name="ev">The event to fire on this context.</param>
 		/// <returns></returns>
 		IEvent Fire(IEvent ev);
-
-		/// <summary>
-		/// Gives access to the current control state of the context.
-		/// This is the common state that behaviours share and that
-		/// provides the end state or result of a contexts running process.
-		/// </summary>
-		IDataDictionary<object> ControlState { get; }
+		
 		/// <summary>
 		/// Messages intended for user feedback.
 		/// </summary>

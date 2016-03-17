@@ -27,11 +27,10 @@ namespace Inversion.Process.Behaviour {
 		/// The action to perform when the `Condition(IEvent)` is met.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
+		public override void Action(IEvent ev) {
 			// GM.150624: Consider changing this to act on ("config","flag")
 			foreach (string name in this.Configuration.GetNames("config", "set")) {
-				context.Flags.Add(name);
+				ev.Context.Flags.Add(name);
 			}
 		}
 	}

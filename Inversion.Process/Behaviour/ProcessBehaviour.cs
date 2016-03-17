@@ -3,74 +3,63 @@
 namespace Inversion.Process.Behaviour {
 
 	/// <summary>
-	/// A simple named behaviour with a default condition
-	/// matching that name againts <see cref="IEvent.Message"/>.
+	/// A simple named behaviour.
 	/// </summary>
 	public abstract class ProcessBehaviour : BehaviourFor<IControlState>, IProcessBehaviour {
 
-		
 		/// <summary>
 		/// Creates a new instance of the behaviour.
 		/// </summary>
 		/// <param name="respondsTo">The message the behaviour responds to.</param>
-		protected ProcessBehaviour(string respondsTo): base(respondsTo) {
-		}
+		protected ProcessBehaviour (string respondsTo) : base(respondsTo) { }
 
 		/// <summary>
 		/// Determines if the event specifies the behaviour by name.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		/// <returns>
-		/// Returns true if true if `ev.Message` is the same as `this.Message`
-		///  </returns>
+		/// Returns true if the condition is met; otherwise, returns false.
+		/// </returns>
 		/// <remarks>
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
-		public virtual bool Condition(IEvent ev) {
-			return this.Condition(ev, (IProcessContext)ev.Context);
+		public override bool Condition(IEventFor<IControlState> ev) {
+			return this.Condition((IEvent)ev);
 		}
 
 		/// <summary>
-		/// Determines if the event specifies the behaviour by name.
+		/// The considtion that determines whether of not the behaviours action
+		/// is valid to run.
 		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context to consult.</param>
+		/// <param name="ev">The event to consider with the condition.</param>
 		/// <returns>
-		/// Returns true if true if `ev.Message` is the same as `this.Message`
-		///  </returns>
-		/// <remarks>
-		/// The intent is to override for bespoke conditions.
-		/// </remarks>
-		public virtual bool Condition(IEvent ev, IProcessContext context) {
-			// check the base condition
-			// and then either there are no roles specified
-			// or the user is in any of the roles defined
-			return this.RespondsTo == "*" || ev.Message == this.RespondsTo;
-		}
-
-		public virtual void Action(IEvent ev) {
-			base.Action(ev);
-		}
-		
-		public override void Action(IEventFor<IControlState> ev, IContextFor<IControlState> context) {
-			this.Action((IEvent)ev, (IProcessContext)context);
+		/// `true` if the condition is met; otherwise,  returns  `false`.
+		/// </returns>
+		public virtual bool Condition (IEvent ev) {
+			return base.Condition(ev);
 		}
 
 		/// <summary>
-		/// The action to perform when the `Condition(IEvent)` is met.
+		/// Process an action for the provided <see cref="IEventFor{IControlState}"/>.
 		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Action(IEvent ev, IProcessContext context);
+		/// <param name="ev">The event to be processed. </param>
+		public override void Action (IEventFor<IControlState> ev) {
+			this.Action((IEvent)ev);
+		}
+
+		/// <summary>
+		/// Process an action for the provided <see cref="IEvent"/>.
+		/// </summary>
+		/// <param name="ev">The event to be processed. </param>
+		public abstract void Action(IEvent ev);
 
 		/// <summary>
 		/// Provide recovery from failures.
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Rescue(IEventFor<IControlState> ev, Exception err, IContextFor<IControlState> context) {
-			this.Rescue((IEvent)ev, err, (IProcessContext)context);
+		public override void Rescue (IEventFor<IControlState> ev, Exception err) {
+			this.Rescue((IEvent)ev, err);
 		}
 
 		/// <summary>
@@ -78,10 +67,11 @@ namespace Inversion.Process.Behaviour {
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		/// <param name="context">The context to consult.</param>
-		public virtual void Rescue(IEvent ev, Exception err, IProcessContext context) {
-			context.State.Errors.Add(new ErrorMessage(err.Message, err));
+		/// <remarks>
+		/// By default we add a new <see cref="ErrorMessage"/> to the contexts errors collection.
+		/// </remarks>
+		public virtual void Rescue(IEvent ev, Exception err) {
+			ev.Context.Errors.Add(new ErrorMessage(err.Message, err));
 		}
-
 	}
 }

@@ -20,19 +20,19 @@ namespace Inversion.Process.Tests.Behaviour {
 
 				context.Register(new TestBehaviour(
 					respondsTo: "*", 
-					action: (ev, ctx) => ctx.Flags.Add("any-hit"))
+					action: (ev) => ev.Context.Flags.Add("any-hit"))
 				);
 				context.Register(new TestBehaviour(
 					respondsTo: "test-message", 
-					action: (ev, ctx) => ctx.Flags.Add("test-hit"))
+					action: (ev) => ev.Context.Flags.Add("test-hit"))
 				);
 				context.Register(new TestBehaviour(
 					respondsTo: "never-message", 
-					action: (ev, ctx) => ctx.Flags.Add("never-hit"))
+					action: (ev) => ev.Context.Flags.Add("never-hit"))
 				);
 				context.Register(
 					condition: (ev) => ev.Message.Contains("left") && ev.Message.Contains("field"), 
-					action: (ev, ctx) => ctx.State.Flags.Add("left-field")
+					action: (ev) => ev.Context.State.Flags.Add("left-field")
 				);
 				
 				context.Fire("test-message");
@@ -238,8 +238,8 @@ namespace Inversion.Process.Tests.Behaviour {
 		[TestMethod]
 		public void ContextHasAllControlStates() {
 			foreach (IProcessContext context in _getContexts()) {
-				context.ControlState["p1"] = "v1";
-				context.ControlState["p2"] = "v2";
+				context.State["p1"] = "v1";
+				context.State["p2"] = "v2";
 
 				IPrototypedBehaviour behaviour = new TestBehaviour("test",
 					new Configuration.Builder {
@@ -253,7 +253,7 @@ namespace Inversion.Process.Tests.Behaviour {
 				// positive 
 				Assert.IsTrue(behaviour.Condition(ev));
 				// negative
-				context.ControlState.Remove("p2");
+				context.State.Remove("p2");
 				Assert.IsFalse(behaviour.Condition(ev));
 			}
 		}
@@ -274,10 +274,10 @@ namespace Inversion.Process.Tests.Behaviour {
 				// positive 
 				Assert.IsTrue(behaviour.Condition(ev));
 				// negative
-				context.ControlState["p1"] = "v1";
+				context.State["p1"] = "v1";
 				Assert.IsFalse(behaviour.Condition(ev));
-				context.ControlState.Remove("p1");
-				context.ControlState["p2"] = "v2";
+				context.State.Remove("p1");
+				context.State["p2"] = "v2";
 				Assert.IsFalse(behaviour.Condition(ev));
 			}
 		}

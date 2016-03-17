@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Inversion.Process;
 using Inversion.Process.Behaviour;
@@ -7,26 +8,26 @@ namespace Inversion.Web.Behaviour {
 	/// <summary>
 	/// A web behaviour that has been provided with a configuration.
 	/// </summary>
-	public abstract class ConfiguredWebBehaviour: ConfiguredBehaviour, IWebBehaviour {
+	public abstract class _ConfiguredWebBehaviour: ConfiguredBehaviour, IWebBehaviour {
 		/// <summary>
 		/// Creates a new instance of the behaviour with no configuration.
 		/// </summary>
 		/// <param name="respondsTo">The message the behaviour will respond to.</param>
-		protected ConfiguredWebBehaviour(string respondsTo) : base(respondsTo) {}
+		protected _ConfiguredWebBehaviour (string respondsTo) : base(respondsTo) {}
 
 		/// <summary>
 		/// Creates a new instance of the behaviour.
 		/// </summary>
 		/// <param name="respondsTo">The message the behaviour will respond to.</param>
 		/// <param name="config">Configuration for the behaviour.</param>
-		protected ConfiguredWebBehaviour(string respondsTo, IConfiguration config) : base(respondsTo, config) {}
+		protected _ConfiguredWebBehaviour (string respondsTo, IConfiguration config) : base(respondsTo, config) {}
 
 		/// <summary>
 		/// Creates a new instance of the behaviour.
 		/// </summary>
 		/// <param name="respondsTo">The message the behaviour will respond to.</param>
 		/// <param name="config">Configuration for the behaviour.</param>
-		protected ConfiguredWebBehaviour(string respondsTo, IEnumerable<IConfigurationElement> config) : base(respondsTo, config) {}
+		protected _ConfiguredWebBehaviour (string respondsTo, IEnumerable<IConfigurationElement> config) : base(respondsTo, config) {}
 
 		/// <summary>
 		/// The considtion that determines whether of not the behaviours action
@@ -45,5 +46,7 @@ namespace Inversion.Web.Behaviour {
 		/// <param name="ev">The event to consult.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
 		public abstract void Action(IEvent ev, IWebContext context);
+
+		public abstract void Rescue(IEvent ev, IWebContext ctx, Exception err);
 	}
 }

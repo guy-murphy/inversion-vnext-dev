@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviour\BootstrapBehaviour.cs" />
-    <Compile Include="Behaviour\ConfiguredWebBehaviour.cs" />
+    <Compile Include="Behaviour\_ConfiguredWebBehaviour.cs" />
     <Compile Include="Behaviour\IWebBehaviour.cs" />
     <Compile Include="Behaviour\ParseRequestBehaviour.cs" />
     <Compile Include="Behaviour\ProcessViewsBehaviour.cs" />

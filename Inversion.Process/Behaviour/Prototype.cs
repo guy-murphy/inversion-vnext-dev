@@ -62,7 +62,7 @@ namespace Inversion.Process.Behaviour {
 			);
 			NamedCases["control-state-excludes"] = new Case(
 				match: (config) => config.Has("control-state", "excludes"),
-				criteria: (config, ev) => config.GetNames("control-state", "excludes").All(key => !ev.Context.ControlState.ContainsKey(key))
+				criteria: (config, ev) => config.GetNames("control-state", "excludes").All(key => !ev.Context.State.ContainsKey(key))
 			);
 		}
 

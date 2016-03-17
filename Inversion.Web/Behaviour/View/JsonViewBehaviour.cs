@@ -30,11 +30,10 @@ namespace Inversion.Web.Behaviour.View {
 		/// Writes the model of the last view-step as json to the content of a new view-step.
 		/// </summary>
 		/// <param name="ev">The event that gave rise to this action.</param>
-		/// <param name="context">The context within which this action is being performed.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			if (context.ViewSteps.HasSteps) {
-				if (context.ViewSteps.Last.HasModel) {
-					context.ViewSteps.CreateStep("json", _contentType, context.ViewSteps.Last.Model.ToJson());
+		public override void Action(IEvent ev) {
+			if (ev.Context.ViewSteps.HasSteps) {
+				if (ev.Context.ViewSteps.Last.HasModel) {
+					ev.Context.ViewSteps.CreateStep("json", _contentType, ev.Context.ViewSteps.Last.Model.ToJson());
 				} else {
 					throw new WebException("Was expecting a model to serialise but found content.");
 				}

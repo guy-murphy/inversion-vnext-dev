@@ -31,58 +31,24 @@ namespace Inversion.Process.Behaviour {
 		/// The intent is to override for bespoke conditions.
 		/// </remarks>
 		public virtual bool Condition(IEventFor<TState> ev) {
-			return this.Condition(ev, ev.Context);
-		}
-
-		/// <summary>
-		/// Determines if the event specifies the behaviour by name.
-		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context to consult.</param>
-		/// <returns>
-		/// Returns true if true if `ev.Message` is the same as `this.Message`
-		///  </returns>
-		/// <remarks>
-		/// The intent is to override for bespoke conditions.
-		/// </remarks>
-		public virtual bool Condition(IEventFor<TState> ev, IContextFor<TState> context) {
 			// check the base condition
 			// and then either there are no roles specified
 			// or the user is in any of the roles defined
 			return this.RespondsTo == "*" || ev.Message == this.RespondsTo;
 		}
+
+		/// <summary>
+		/// The action to perform when the `Condition(IEvent)` is met.
+		/// </summary>
+		/// <param name="ev">The event to consult.</param>
+		public abstract void Action(IEventFor<TState> ev);
 		
 		/// <summary>
-		/// The action to perform when the `Condition(IEvent)` is met.
-		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		public virtual void Action(IEventFor<TState> ev) {
-			this.Action(ev, ev.Context);
-		}
-
-		/// <summary>
-		/// The action to perform when the `Condition(IEvent)` is met.
-		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Action(IEventFor<TState> ev, IContextFor<TState> context);
-
-		/// <summary>
 		/// Provide recovery from failures.
 		/// </summary>
 		/// <param name="ev">The event to process.</param>
 		/// <param name="err">The exception raised by the behaviours actions.</param>
-		public virtual void Rescue(IEventFor<TState> ev, Exception err) {
-			this.Rescue(ev, err, ev.Context);
-		}
-
-		/// <summary>
-		/// Provide recovery from failures.
-		/// </summary>
-		/// <param name="ev">The event to process.</param>
-		/// <param name="err">The exception raised by the behaviours actions.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public abstract void Rescue(IEventFor<TState> ev, Exception err, IContextFor<TState> context);
-
+		public abstract void Rescue(IEventFor<TState> ev, Exception err);
+		
 	}
 }

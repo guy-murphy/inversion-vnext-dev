@@ -36,27 +36,27 @@ namespace Inversion.Web.Behaviour {
 		/// </summary>
 		/// <param name="ev">The vent that was considered for this action.</param>
 		/// <param name="context">The context to act upon.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
+		public override void Action(IEvent ev) {
 			// this is the last point we can time until and still output it
-			if (context.Timers.ContainsKey("process-request")) context.Timers.End("process-request");
+			if (ev.Context.Timers.ContainsKey("process-request")) ev.Context.Timers.End("process-request");
 			// check that we have an initial view step laid down at least
-			if (context.ViewSteps.HasSteps) {
+			if (ev.Context.ViewSteps.HasSteps) {
 				// then determine how many views there are to process
 				// in this convention we take the view as specified by the "tail" of the request url
 				string[] views;
-				if (context.HasParams("views") && !String.IsNullOrEmpty(context.Params["views"])) {
-					views = context.Params["views"].Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries);
+				if (ev.Context.HasParams("views") && !String.IsNullOrEmpty(ev.Context.Params["views"])) {
+					views = ev.Context.Params["views"].Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries);
 				} else if (this.Configuration.Has("config", "default-view")) {
 					views = this.Configuration.GetNames("config", "default-view").ToArray();
-					context.Params["views"] = String.Join(";", views);
+					ev.Context.Params["views"] = String.Join(";", views);
 				} else {
 					views = new string[] {"st"};
-					context.Params["views"] = "st";
+					ev.Context.Params["views"] = "st";
 				}
 				foreach (string view in views) {
 					if (!String.IsNullOrEmpty(view)) {
 						string msg = String.Format("{0}::view", view);
-						context.Fire(msg);
+						ev.Context.Fire(msg);
 					}
 				}
 			} else {

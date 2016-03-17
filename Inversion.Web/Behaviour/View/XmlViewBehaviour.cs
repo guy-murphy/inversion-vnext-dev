@@ -34,25 +34,24 @@ namespace Inversion.Web.Behaviour.View {
 		/// Writes the model of the last view-step as xml to the content of a new view-step.
 		/// </summary>
 		/// <param name="ev">The event that gave rise to this action.</param>
-		/// <param name="context">The context within which this action is being performed.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			if (context.ViewSteps.HasSteps) {
-				if (context.ViewSteps.Last.HasModel) {
+		public override void Action(IEvent ev) {
+			if (ev.Context.ViewSteps.HasSteps) {
+				if (ev.Context.ViewSteps.Last.HasModel) {
 					TextWriter writer = new StringWriter();
 					writer.WriteLine(@"<?xml version=""1.0"" ?>");
 					// we take the last step and transform it into a new representation
-					context.ViewSteps.Last.Model.ToXml(writer);
+					ev.Context.ViewSteps.Last.Model.ToXml(writer);
 					// then add the new representation as a new step
-					context.ViewSteps.CreateStep("xml", _contentType, writer.ToString());
+					ev.Context.ViewSteps.CreateStep("xml", _contentType, writer.ToString());
 					// the next step in the pipeline may in turn transform this
 					// all previous steps remain accessible via context.ViewSteps
 				} else {
 					// try and parse the content of the last step as xml
-					if (context.ViewSteps.Last.HasContent) {
+					if (ev.Context.ViewSteps.Last.HasContent) {
 						try {
 							XmlDocument content = new XmlDocument();
-							content.LoadXml(context.ViewSteps.Last.Content);
-							context.ViewSteps.CreateStep("xml", _contentType, content.OuterXml);
+							content.LoadXml(ev.Context.ViewSteps.Last.Content);
+							ev.Context.ViewSteps.CreateStep("xml", _contentType, content.OuterXml);
 						} catch (XmlException) {
 							throw new WebException("Unable to process content that is not XML.");
 						}

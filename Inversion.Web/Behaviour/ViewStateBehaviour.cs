@@ -42,19 +42,19 @@ namespace Inversion.Web.Behaviour {
 		/// to your view layer.
 		/// </remarks>
 		/// <param name="ev">The event that gave rise to this action.</param>
-		/// <param name="context">The context within which this action is being performed.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			DataDictionary<IData> model = new DataDictionary<IData>();
+		public override void Action(IEvent ev) {
+			DataDictionary<IData> model = new DataDictionary<IData> {
+				["messages"] = ev.Context.Messages,
+				["errors"] = ev.Context.Errors,
+				["flags"] = ev.Context.Flags,
+				["timers"] = ev.Context.Timers,
+				["params"] = new DataDictionary<string>(ev.Context.Params.Where(param => !param.Key.StartsWith("_")))
+			};
 
 			// copy from the context
-			model["messages"] = context.Messages;
-			model["errors"] = context.Errors;
-			model["flags"] = context.Flags;
-			model["timers"] = context.Timers;
-			model["params"] = new DataDictionary<string>(context.Params.Where(param => !param.Key.StartsWith("_")));
 
 			// copy from the control state
-			foreach (KeyValuePair<string, object> entry in context.ControlState) {
+			foreach (KeyValuePair<string, object> entry in ev.Context.State) {
 				if (!entry.Key.StartsWith("_")) { // exclude "private" items
 					if (entry.Value is IData) {
 						model[entry.Key] = entry.Value as IData;
@@ -65,10 +65,10 @@ namespace Inversion.Web.Behaviour {
 			}
 
 			
-			if (context.HasParams("model-item") && model.ContainsKey(context.Params["model-item"])) {
-				context.ViewSteps.CreateStep("view-state", model[context.Params["model-item"]]);
+			if (ev.Context.HasParams("model-item") && model.ContainsKey(ev.Context.Params["model-item"])) {
+				ev.Context.ViewSteps.CreateStep("view-state", model[ev.Context.Params["model-item"]]);
 			} else {
-				context.ViewSteps.CreateStep("view-state", model);
+				ev.Context.ViewSteps.CreateStep("view-state", model);
 			}
 		}
 

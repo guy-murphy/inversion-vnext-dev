@@ -32,6 +32,27 @@ namespace Inversion.Process.Behaviour {
 	/// ]]> </code>
 	/// </example>
 	public interface IProcessBehaviour: IBehaviourFor<IControlState> {
-		void Action(IEvent ev);
+		/// <summary>
+		/// The considtion that determines whether of not the behaviours action
+		/// is valid to run.
+		/// </summary>
+		/// <param name="ev">The event to consider with the condition.</param>
+		/// <returns>
+		/// `true` if the condition is met; otherwise,  returns  `false`.
+		/// </returns>
+		bool Condition (IEvent ev);
+		
+		/// <summary>
+		/// Process an action for the provided <see cref="IEvent"/>.
+		/// </summary>
+		/// <param name="ev">The event to be processed. </param>
+		void Action (IEvent ev);
+		
+		/// <summary>
+		/// Provide recovery from failures.
+		/// </summary>
+		/// <param name="ev">The event to process.</param>
+		/// <param name="err">The exception raised by the behaviours actions.</param>
+		void Rescue (IEvent ev, Exception err);
 	}
 }

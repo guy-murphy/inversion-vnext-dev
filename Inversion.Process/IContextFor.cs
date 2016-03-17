@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Inversion.Data;
 using Inversion.Process.Behaviour;
 
@@ -16,7 +17,7 @@ namespace Inversion.Process {
 	/// </remarks>
 	/// <typeparam name="TState">The type of context state.</typeparam>
 	public interface IContextFor<TState>: IDisposable {
-
+		
 		/// <summary>
 		/// Exposes the processes service container.
 		/// </summary>
@@ -54,7 +55,18 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="condition">The predicate to use as the behaviours condition.</param>
 		/// <param name="action">The action to use as the behaviours action.</param>
-		void Register(Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>, IContextFor<TState>> action);
+		void Register (Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>> action);
+
+		/// <summary>
+		/// Creates and registers a runtime behaviour with this context constructed 
+		/// from a predicate representing the behaviours condition, and an action
+		/// representing the behaviours action. This behaviour will be consulted for
+		/// any event fired on this context.
+		/// </summary>
+		/// <param name="condition">The predicate to use as the behaviours condition.</param>
+		/// <param name="action">The action to use as the behaviours action.</param>
+		/// <param name="rescue">The action to perform to recover from errors.</param>
+		void Register(Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>> action, Action<IEventFor<TState>, Exception> rescue);
 
 		/// <summary>
 		/// Fires an event on the context. Each behaviour registered with context

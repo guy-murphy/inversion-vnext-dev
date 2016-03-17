@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 using Inversion.Process;
 using Inversion.Process.Behaviour;
@@ -49,8 +50,8 @@ namespace Inversion.Web.Behaviour {
 		/// <returns>
 		/// Returns true if the selection criteria for this behaviour each return true.
 		///  </returns>
-		public bool Condition(IEvent ev, IWebContext context) {
-			return base.Condition(ev, context);
+		public virtual bool Condition(IEvent ev, IWebContext context) {
+			return base.Condition(ev);
 		}
 
 		/// <summary>
@@ -58,23 +59,33 @@ namespace Inversion.Web.Behaviour {
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		public override void Action(IEvent ev) {
-			this.Action(ev, ev.Context);
+			this.Action(ev, (IWebContext)ev.Context);
 		}
-
-		/// <summary>
-		/// The action to perform when the `Condition(IEvent)` is met.
-		/// </summary>
-		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			this.Action(ev, (IWebContext)context);
-		}
-
+		
 		/// <summary>
 		/// The action to perform if this behaviours condition is met.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
 		/// <param name="context">The context upon which to perform any action.</param>
 		public abstract void Action(IEvent ev, IWebContext context);
+
+		/// <summary>
+		/// Provide recovery from failures.
+		/// </summary>
+		/// <param name="ev">The event to process.</param>
+		/// <param name="err">The exception raised by the behaviours actions.</param>
+		public override void Rescue (IEvent ev, Exception err) {
+			this.Rescue(ev, (IWebContext)ev.Context, err);
+		}
+
+		/// <summary>
+		/// Provide recovery from failures.
+		/// </summary>
+		/// <param name="ev">The event to process.</param>
+		/// <param name="ctx">The context to consider.</param>
+		/// <param name="err">The exception raised by the behaviours actions.</param>
+		public virtual void Rescue (IEvent ev, IWebContext ctx, Exception err) {
+			base.Rescue(ev, err);
+		}
 	}
 }

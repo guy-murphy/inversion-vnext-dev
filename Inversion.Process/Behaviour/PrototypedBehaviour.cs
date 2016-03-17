@@ -13,15 +13,12 @@ namespace Inversion.Process.Behaviour {
 		/// <summary>
 		/// Provides access to a prototype specification.
 		/// </summary>
-		public IPrototype Prototype {
-			get { return _prototype; }
-		}
+		public IPrototype Prototype => _prototype;
+
 		/// <summary>
 		/// Provices access to component configuration stuiable for querying.
 		/// </summary>
-		public IConfiguration Configuration {
-			get { return _prototype; }
-		}
+		public IConfiguration Configuration => _prototype;
 
 		/// <summary>
 		/// Creates a new instance of the behaviour.
@@ -53,8 +50,8 @@ namespace Inversion.Process.Behaviour {
 		/// <returns>
 		/// Returns true if the selection criteria for this behaviour each return true.
 		///  </returns>
-		public override bool Condition(IEvent ev, IProcessContext context) {
-			return base.Condition(ev, context) && this.Prototype.Criteria.All(criteria => criteria(this.Configuration, ev));
+		public override bool Condition(IEvent ev) {
+			return base.Condition(ev) && this.Prototype.Criteria.All(criteria => criteria(this.Configuration, ev));
 		}
 
 	}

@@ -131,9 +131,23 @@ namespace Inversion.Process {
 		/// </summary>
 		/// <param name="condition">The predicate to use as the behaviours condition.</param>
 		/// <param name="action">The action to use as the behaviours action.</param>
-		public void Register(Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>, IContextFor<TState>> action) {
-			this.Register(new RuntimeBehaviourFor<TState>(String.Empty, condition, action));
+		public void Register (Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>> action) {
+			this.Register(new RuntimeBehaviourFor<TState>(String.Empty, condition, action, (ev,err) => {/*nop*/}));
 		}
+
+		/// <summary>
+		/// Creates and registers a runtime behaviour with this context constructed 
+		/// from a predicate representing the behaviours condition, and an action
+		/// representing the behaviours action. This behaviour will be consulted for
+		/// any event fired on this context.
+		/// </summary>
+		/// <param name="condition">The predicate to use as the behaviours condition.</param>
+		/// <param name="action">The action to use as the behaviours action.</param>
+		/// <param name="rescue">The action to perform to recover from errors.</param>
+		public void Register(Predicate<IEventFor<TState>> condition, Action<IEventFor<TState>> action, Action<IEventFor<TState>, Exception> rescue) {
+			this.Register(new RuntimeBehaviourFor<TState>(String.Empty, condition, action, rescue));
+		}
+		
 
 		/// <summary>
 		/// Fires an event on the context. Each behaviour registered with context

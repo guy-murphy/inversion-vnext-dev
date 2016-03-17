@@ -37,10 +37,6 @@ namespace Inversion.Web {
 		/// the current user for this context.
 		/// </summary>
 		IPrincipal User { get; set; }
-
-		/// <summary>
-		/// Indicates completion of processing for this context.
-		/// </summary>
-		void Completed();
+		
 	}
 }

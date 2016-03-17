@@ -24,9 +24,8 @@ namespace Inversion.Process.Behaviour {
 		/// The action to perform when the `Condition(IEvent)` is met.
 		/// </summary>
 		/// <param name="ev">The event to consult.</param>
-		/// <param name="context">The context upon which to perform any action.</param>
-		public override void Action(IEvent ev, IProcessContext context) {
-			this.FireSequenceFromConfig(context, "fire");
+		public override void Action(IEvent ev) {
+			this.FireSequenceFromConfig(ev.Context, "fire");
 		}
 	}
 }
